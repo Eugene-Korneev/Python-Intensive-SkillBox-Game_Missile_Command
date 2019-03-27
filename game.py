@@ -1,4 +1,5 @@
 import math
+import random
 import turtle
 
 window = turtle.Screen()
@@ -39,14 +40,27 @@ def fire_missile(x, y):
         our_missiles.append(missiles_info)
 
 
-window.onclick(fire_missile)
+def enemy_missile():
+    x = random.randint(-1000, 1000)
+    y = 350
+    heading = calc_heading(x1=x, y1=y, x2=BASE_X, y2=BASE_Y)
 
-our_missiles = []
+    new_missile = turtle.Turtle(visible=False)
+    new_missile.speed(0)
+    new_missile.color('red')
+    new_missile.penup()
+    new_missile.setpos(x=x, y=y)
+    new_missile.pendown()
+    new_missile.setheading(heading)
+    new_missile.showturtle()
 
-while True:
-    window.update()
+    missiles_info = {'missile': new_missile, 'target': [BASE_X, BASE_Y],
+                     'state': 'launched', 'radius': 0}
+    enemy_missiles.append(missiles_info)
 
-    for missile_info in our_missiles:
+
+def move_missile(missiles_list):
+    for missile_info in missiles_list:
         state = missile_info['state']
         missile = missile_info['missile']
         if state == 'launched':
@@ -61,12 +75,28 @@ while True:
                 missile.clear()
                 missile.hideturtle()
                 missile_info['state'] = 'dead'
+                dead_missiles.append(missile_info)
             else:
                 missile.shapesize(missile_info['radius'])
 
-    dead_missiles = [info for info in our_missiles if info['state'] == 'dead']
-    for dead in dead_missiles:
-        our_missiles.remove(dead)
 
-# TODO Вражеские ракеты появляются в рандоме (рандомный x и задержка)
-#  и летят к базе
+window.onclick(fire_missile)
+
+our_missiles = []
+enemy_missiles = []
+delay = 0
+
+while True:
+    window.update()
+    dead_missiles = []
+
+    if delay == 0:
+        enemy_missile()
+        delay = random.randint(30, 100)
+
+    move_missile(our_missiles)
+    move_missile(enemy_missiles)
+
+    delay -= 1
+    for dead in dead_missiles:
+        our_missiles.remove(dead) if dead in our_missiles else enemy_missiles.remove(dead)
