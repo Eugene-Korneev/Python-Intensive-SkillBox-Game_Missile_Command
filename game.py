@@ -86,6 +86,20 @@ def check_interceptions():
                 enemy_info['state'] = 'dead'
 
 
+def check_impact():
+    global base_health
+    for enemy_info in enemy_missiles:
+        if enemy_info['state'] != 'explode':
+            continue
+        enemy_missile = enemy_info['missile']
+        if enemy_missile.distance(BASE_X, BASE_Y) < enemy_info['radius'] * 10:
+            base_health -= 100
+
+
+def game_over():
+    return base_health < 0
+
+
 window.onclick(fire_missile)
 
 our_missiles = []
@@ -101,9 +115,14 @@ window.register_shape(pic_path)
 base.shape(pic_path)
 base.showturtle()
 
+base_health = 2000
+
 
 while True:
     window.update()
+    if game_over():
+        continue
+    check_impact()
     check_enemy_count()
     check_interceptions()
     move_missile(missiles=our_missiles)
