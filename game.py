@@ -65,6 +65,32 @@ class Missile:
         return self.pen.ycor()
 
 
+class Building:
+
+    def __init__(self, x, y, picture, health):
+
+        pen = turtle.Turtle()
+        pen.hideturtle()
+        pen.speed(0)
+        pen.penup()
+        pen.setpos(x=x, y=y)
+        pic_path = os.path.join(BASE_PATH, "images", picture)
+        window.register_shape(pic_path)
+        pen.shape(pic_path)
+        pen.showturtle()
+        self.pen = pen
+
+        self.health = health
+
+    @property
+    def x(self):
+        return self.pen.xcor()
+
+    @property
+    def y(self):
+        return self.pen.ycor()
+
+
 def fire_missile(x, y):
     info = Missile(color='white', x=BASE_X, y=BASE_Y, x2=x, y2=y)
     our_missiles.append(info)
@@ -73,7 +99,8 @@ def fire_missile(x, y):
 def fire_enemy_missile():
     x = random.randint(-600, 600)
     y = 400
-    info = Missile(color='red', x=x, y=y, x2=BASE_X, y2=BASE_Y)
+    target = random.choice(buildings)
+    info = Missile(color='red', x=x, y=y, x2=target.x, y2=target.y)
     enemy_missiles.append(info)
 
 
@@ -101,39 +128,36 @@ def check_interceptions():
 
 
 def check_impact():
-    global base_health
-    for enemy_missile in enemy_missiles:
-        if enemy_missile.state != 'explode':
-            continue
-        if enemy_missile.distance(BASE_X, BASE_Y) < enemy_missile.radius * 10:
-            base_health -= 100
+    for building in buildings:
+        for enemy_missile in enemy_missiles:
+            if enemy_missile.state != 'explode':
+                continue
+            if enemy_missile.distance(building.x, building.y) < enemy_missile.radius * 10:
+                building.health -= 100
 
 
 def game_over():
-    return base_health < 0
+    return buildings[0].health < 0
+
+
+def set_buildings():
+    buildings_info = [{'x': BASE_X, 'y': BASE_Y, 'picture': 'base.gif', 'health': 2000},
+                      {'x': BASE_X-200, 'y': BASE_Y, 'picture': 'kremlin_1.gif', 'health': 100},
+                      {'x': BASE_X-400, 'y': BASE_Y, 'picture': 'nuclear_1.gif', 'health': 100},
+                      {'x': BASE_X+200, 'y': BASE_Y, 'picture': 'skyscraper_1.gif', 'health': 100},
+                      {'x': BASE_X+400, 'y': BASE_Y, 'picture': 'house_1.gif', 'health': 100}]
+    for info in buildings_info:
+        building = Building(x=info['x'], y=info['y'], picture=info['picture'], health=info['health'])
+        buildings.append(building)
 
 
 window.onclick(fire_missile)
 
 our_missiles = []
 enemy_missiles = []
+buildings = []
 
-# TODO HW: 1. Make building object for the base. Params: (x, y, pic)
-#          2. Make 4 more buildings with health = 100
-#          3. Enemy missiles mast attack all alive buildings randomly
-
-base = turtle.Turtle()
-base.hideturtle()
-base.speed(0)
-base.penup()
-base.setpos(x=BASE_X, y=BASE_Y)
-pic_path = os.path.join(BASE_PATH, "images", "base.gif")
-window.register_shape(pic_path)
-base.shape(pic_path)
-base.showturtle()
-
-base_health = 2000
-
+set_buildings()
 
 while True:
     window.update()
