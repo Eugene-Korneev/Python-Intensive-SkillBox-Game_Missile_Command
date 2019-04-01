@@ -15,44 +15,35 @@ BASE_X, BASE_Y = 0, -300
 ENEMY_COUNT = 5
 
 
-def fire_missile(x, y):
-    new_missile = turtle.Turtle(visible=False)
-    new_missile.speed(0)
-    new_missile.color('white')
-    new_missile.penup()
-    new_missile.setpos(x=BASE_X, y=BASE_Y)
-    new_missile.pendown()
-    heading = new_missile.towards(x=x, y=y)
-    if 0 < heading < 180:
-        new_missile.setheading(heading)
-        new_missile.showturtle()
+def create_missile(color, x, y, x2, y2):
+    missile = turtle.Turtle(visible=False)
+    missile.speed(0)
+    missile.color(color)
+    missile.penup()
+    missile.setpos(x=x, y=y)
+    missile.pendown()
+    heading = missile.towards(x=x2, y=y2)
+    missile.setheading(heading)
+    missile.showturtle()
+    info = {'missile': missile, 'target': [x2, y2],
+            'state': 'launched', 'radius': 0}
+    return info
 
-        missile_info = {'missile': new_missile, 'target': [x, y],
-                        'state': 'launched', 'radius': 0}
-        our_missiles.append(missile_info)
+
+def fire_missile(x, y):
+    info = create_missile(color='white', x=BASE_X, y=BASE_Y, x2=x, y2=y)
+    our_missiles.append(info)
 
 
 def fire_enemy_missile():
     x = random.randint(-600, 600)
     y = 400
-
-    new_missile = turtle.Turtle(visible=False)
-    new_missile.speed(0)
-    new_missile.color('red')
-    new_missile.penup()
-    new_missile.setpos(x=x, y=y)
-    new_missile.pendown()
-    heading = new_missile.towards(x=BASE_X, y=BASE_Y)
-    new_missile.setheading(heading)
-    new_missile.showturtle()
-
-    missile_info = {'missile': new_missile, 'target': [BASE_X, BASE_Y],
-                    'state': 'launched', 'radius': 0}
-    enemy_missiles.append(missile_info)
+    info = create_missile(color='red', x=x, y=y, x2=BASE_X, y2=BASE_Y)
+    enemy_missiles.append(info)
 
 
-def move_missile(missiles_list):
-    for missile_info in missiles_list:
+def move_missile(missiles):
+    for missile_info in missiles:
         state = missile_info['state']
         missile = missile_info['missile']
         if state == 'launched':
@@ -67,9 +58,12 @@ def move_missile(missiles_list):
                 missile.clear()
                 missile.hideturtle()
                 missile_info['state'] = 'dead'
-                dead_missiles.append(missile_info)
             else:
                 missile.shapesize(missile_info['radius'])
+
+    dead_missiles = [info for info in missiles if info['state'] == 'dead']
+    for dead in dead_missiles:
+        missiles.remove(dead)
 
 
 window.onclick(fire_missile)
@@ -79,13 +73,9 @@ enemy_missiles = []
 
 while True:
     window.update()
-    dead_missiles = []
 
     if len(enemy_missiles) < ENEMY_COUNT:
         fire_enemy_missile()
 
-    move_missile(our_missiles)
-    move_missile(enemy_missiles)
-
-    for dead in dead_missiles:
-        our_missiles.remove(dead) if dead in our_missiles else enemy_missiles.remove(dead)
+    move_missile(missiles=our_missiles)
+    move_missile(missiles=enemy_missiles)
