@@ -67,28 +67,21 @@ class Missile:
 
 class Building:
 
-    def __init__(self, x, y, picture, health):
+    def __init__(self, x, y, name):
+        self.name = name
 
         pen = turtle.Turtle()
         pen.hideturtle()
         pen.speed(0)
         pen.penup()
         pen.setpos(x=x, y=y)
-        pic_path = os.path.join(BASE_PATH, "images", picture)
+        pic_path = os.path.join(BASE_PATH, "images", f"{self.name}.gif")
         window.register_shape(pic_path)
         pen.shape(pic_path)
         pen.showturtle()
         self.pen = pen
 
-        self.health = health
-
-    @property
-    def x(self):
-        return self.pen.xcor()
-
-    @property
-    def y(self):
-        return self.pen.ycor()
+        self.health = 2000
 
 
 def fire_missile(x, y):
@@ -99,8 +92,7 @@ def fire_missile(x, y):
 def fire_enemy_missile():
     x = random.randint(-600, 600)
     y = 400
-    target = random.choice(buildings)
-    info = Missile(color='red', x=x, y=y, x2=target.x, y2=target.y)
+    info = Missile(color='red', x=x, y=y, x2=BASE_X, y2=BASE_Y)
     enemy_missiles.append(info)
 
 
@@ -128,27 +120,15 @@ def check_interceptions():
 
 
 def check_impact():
-    for building in buildings:
-        for enemy_missile in enemy_missiles:
-            if enemy_missile.state != 'explode':
-                continue
-            if enemy_missile.distance(building.x, building.y) < enemy_missile.radius * 10:
-                building.health -= 100
+    for enemy_missile in enemy_missiles:
+        if enemy_missile.state != 'explode':
+            continue
+        if enemy_missile.distance(BASE_X, BASE_Y) < enemy_missile.radius * 10:
+            base.health -= 100
 
 
 def game_over():
-    return buildings[0].health < 0
-
-
-def set_buildings():
-    buildings_info = [{'x': BASE_X, 'y': BASE_Y, 'picture': 'base.gif', 'health': 2000},
-                      {'x': BASE_X-200, 'y': BASE_Y, 'picture': 'kremlin_1.gif', 'health': 100},
-                      {'x': BASE_X-400, 'y': BASE_Y, 'picture': 'nuclear_1.gif', 'health': 100},
-                      {'x': BASE_X+200, 'y': BASE_Y, 'picture': 'skyscraper_1.gif', 'health': 100},
-                      {'x': BASE_X+400, 'y': BASE_Y, 'picture': 'house_1.gif', 'health': 100}]
-    for info in buildings_info:
-        building = Building(x=info['x'], y=info['y'], picture=info['picture'], health=info['health'])
-        buildings.append(building)
+    return base.health < 0
 
 
 window.onclick(fire_missile)
@@ -157,7 +137,18 @@ our_missiles = []
 enemy_missiles = []
 buildings = []
 
-set_buildings()
+base = Building(x=BASE_X, y=BASE_Y, name='base')
+buildings.append(base)
+
+building_infos = {'house': [BASE_X - 400, BASE_Y],
+                  'kremlin': [BASE_X - 200, BASE_Y],
+                  'nuclear': [BASE_X + 200, BASE_Y],
+                  'skyscraper': [BASE_X + 400, BASE_Y]}
+for name, position in building_infos.items():
+    building = Building(x=position[0], y=position[1], name=name)
+    buildings.append(building)
+
+# TODO Contionue video from 52:00
 
 while True:
     window.update()
