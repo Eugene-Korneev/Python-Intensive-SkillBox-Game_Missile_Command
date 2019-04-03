@@ -4,13 +4,6 @@ import turtle
 
 
 BASE_PATH = os.path.dirname(__file__)
-
-window = turtle.Screen()
-window.setup(1200 + 3, 800 + 3, starty=0)
-window.bgpic(os.path.join(BASE_PATH, "images", "background.png"))
-window.screensize(1200, 800)
-window.tracer(n=2)
-
 BASE_X, BASE_Y = 0, -300
 ENEMY_COUNT = 5
 
@@ -75,13 +68,23 @@ class Building:
         pen.speed(0)
         pen.penup()
         pen.setpos(x=x, y=y)
-        pic_path = os.path.join(BASE_PATH, "images", f"{self.name}.gif")
+
+        pic_path = os.path.join(BASE_PATH, "images", self.get_pic_name())
         window.register_shape(pic_path)
         pen.shape(pic_path)
         pen.showturtle()
         self.pen = pen
 
         self.health = 2000
+
+    def get_pic_name(self):
+        return f"{self.name}_1.gif"
+
+
+class MissileBase(Building):
+
+    def get_pic_name(self):
+        return f"{self.name}.gif"
 
 
 def fire_missile(x, y):
@@ -131,24 +134,29 @@ def game_over():
     return base.health < 0
 
 
+window = turtle.Screen()
+window.setup(1200 + 3, 800 + 3, starty=0)
+window.bgpic(os.path.join(BASE_PATH, "images", "background.png"))
+window.screensize(1200, 800)
+window.tracer(n=2)
 window.onclick(fire_missile)
 
 our_missiles = []
 enemy_missiles = []
 buildings = []
 
-base = Building(x=BASE_X, y=BASE_Y, name='base')
+base = MissileBase(x=BASE_X, y=BASE_Y, name='base')
 buildings.append(base)
 
 building_infos = {'house': [BASE_X - 400, BASE_Y],
                   'kremlin': [BASE_X - 200, BASE_Y],
                   'nuclear': [BASE_X + 200, BASE_Y],
                   'skyscraper': [BASE_X + 400, BASE_Y]}
+
 for name, position in building_infos.items():
     building = Building(x=position[0], y=position[1], name=name)
     buildings.append(building)
 
-# TODO Contionue video from 52:00
 
 while True:
     window.update()
