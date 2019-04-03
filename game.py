@@ -6,6 +6,10 @@ import turtle
 BASE_PATH = os.path.dirname(__file__)
 BASE_X, BASE_Y = 0, -300
 ENEMY_COUNT = 5
+BUILDING_INFOS = {'house': [BASE_X - 400, BASE_Y],
+                  'kremlin': [BASE_X - 200, BASE_Y],
+                  'nuclear': [BASE_X + 200, BASE_Y],
+                  'skyscraper': [BASE_X + 400, BASE_Y]}
 
 
 class Missile:
@@ -169,7 +173,9 @@ def check_impact():
 
 
 def game_over():
-    return base.health < 0
+    for building in buildings:
+        if building.name == 'base':
+            return building.health < 0
 
 
 def draw_buildings():
@@ -181,33 +187,36 @@ window = turtle.Screen()
 window.setup(1200 + 3, 800 + 3, starty=0)
 window.bgpic(os.path.join(BASE_PATH, "images", "background.png"))
 window.screensize(1200, 800)
-window.tracer(n=2)
-window.onclick(fire_missile)
-
-our_missiles = []
-enemy_missiles = []
-buildings = []
-
-base = MissileBase(x=BASE_X, y=BASE_Y, bld_name='base')
-buildings.append(base)
-
-building_infos = {'house': [BASE_X - 400, BASE_Y],
-                  'kremlin': [BASE_X - 200, BASE_Y],
-                  'nuclear': [BASE_X + 200, BASE_Y],
-                  'skyscraper': [BASE_X + 400, BASE_Y]}
-
-for name, position in building_infos.items():
-    bld = Building(x=position[0], y=position[1], bld_name=name)
-    buildings.append(bld)
 
 
-while True:
-    window.update()
-    if game_over():
-        continue
-    draw_buildings()
-    check_impact()
-    check_enemy_count()
-    check_interceptions()
-    move_missiles(missiles=our_missiles)
-    move_missiles(missiles=enemy_missiles)
+# TODO Continue from 01:58
+def game():
+    global our_missiles, enemy_missiles, buildings
+
+    window.tracer(n=2)
+    window.onclick(fire_missile)
+
+    our_missiles = []
+    enemy_missiles = []
+    buildings = []
+
+    base = MissileBase(x=BASE_X, y=BASE_Y, bld_name='base')
+    buildings.append(base)
+
+    for name, position in BUILDING_INFOS.items():
+        bld = Building(x=position[0], y=position[1], bld_name=name)
+        buildings.append(bld)
+
+    while True:
+        window.update()
+        if game_over():
+            continue
+        draw_buildings()
+        check_impact()
+        check_enemy_count()
+        check_interceptions()
+        move_missiles(missiles=our_missiles)
+        move_missiles(missiles=enemy_missiles)
+
+
+game()
