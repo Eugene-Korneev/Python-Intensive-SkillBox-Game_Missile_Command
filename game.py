@@ -59,29 +59,32 @@ class Missile:
 
 
 class Building:
+    INITIAL_HEALTH = 1000
 
-    def __init__(self, x, y, name):
-        self.name = name
+    def __init__(self, x, y, bld_name):
+        self.name = bld_name
+        self.x = x
+        self.y = y
 
         pen = turtle.Turtle()
         pen.hideturtle()
         pen.speed(0)
         pen.penup()
-        pen.setpos(x=x, y=y)
-
+        pen.setpos(x=self.x, y=self.y)
         pic_path = os.path.join(BASE_PATH, "images", self.get_pic_name())
         window.register_shape(pic_path)
         pen.shape(pic_path)
         pen.showturtle()
         self.pen = pen
 
-        self.health = 2000
+        self.health = self.INITIAL_HEALTH
 
     def get_pic_name(self):
         return f"{self.name}_1.gif"
 
 
 class MissileBase(Building):
+    INITIAL_HEALTH = 2000
 
     def get_pic_name(self):
         return f"{self.name}.gif"
@@ -95,7 +98,8 @@ def fire_missile(x, y):
 def fire_enemy_missile():
     x = random.randint(-600, 600)
     y = 400
-    info = Missile(color='red', x=x, y=y, x2=BASE_X, y2=BASE_Y)
+    target = random.choice(buildings)
+    info = Missile(color='red', x=x, y=y, x2=target.x, y2=target.y)
     enemy_missiles.append(info)
 
 
@@ -126,8 +130,10 @@ def check_impact():
     for enemy_missile in enemy_missiles:
         if enemy_missile.state != 'explode':
             continue
-        if enemy_missile.distance(BASE_X, BASE_Y) < enemy_missile.radius * 10:
-            base.health -= 100
+        for building in buildings:
+            if enemy_missile.distance(building.x, building.y) < enemy_missile.radius * 10:
+                building.health -= 100
+                print(f"{building.name} - {building.health}")
 
 
 def game_over():
@@ -145,7 +151,7 @@ our_missiles = []
 enemy_missiles = []
 buildings = []
 
-base = MissileBase(x=BASE_X, y=BASE_Y, name='base')
+base = MissileBase(x=BASE_X, y=BASE_Y, bld_name='base')
 buildings.append(base)
 
 building_infos = {'house': [BASE_X - 400, BASE_Y],
@@ -154,8 +160,8 @@ building_infos = {'house': [BASE_X - 400, BASE_Y],
                   'skyscraper': [BASE_X + 400, BASE_Y]}
 
 for name, position in building_infos.items():
-    building = Building(x=position[0], y=position[1], name=name)
-    buildings.append(building)
+    bld = Building(x=position[0], y=position[1], bld_name=name)
+    buildings.append(bld)
 
 
 while True:
