@@ -78,6 +78,16 @@ class Building:
         pen.showturtle()
         self.pen = pen
 
+        title = turtle.Turtle(visible=False)
+        title.hideturtle()
+        title.speed(0)
+        title.penup()
+        title.setpos(x=self.x, y=self.y - 80)
+        title.color("purple")
+        title.write(str(self.health), align="center", font=["Arial", 20, "bold"])
+        self.title = title
+        self.title_health = self.health
+
     def get_pic_name(self):
         if self.health < self.INITIAL_HEALTH * 0.2:
             return f"{self.name}_3.gif"
@@ -91,6 +101,13 @@ class Building:
         if self.pen.shape() != pic_path:
             window.register_shape(pic_path)
             self.pen.shape(pic_path)
+        if self.health != self.title_health:
+            self.title_health = self.health
+            self.title.clear()
+            self.title.write(str(self.title_health), align="center", font=["Arial", 20, "bold"])
+
+    def is_alive(self):
+        return self.health > 0
 
 
 class MissileBase(Building):
@@ -98,22 +115,24 @@ class MissileBase(Building):
 
     def get_pic_name(self):
         for missile in our_missiles:
-            if missile.distance(self.x, self.y) < 20:
+            if missile.distance(self.x, self.y) < 50:
                 return f"{self.name}_opened.gif"
         return f"{self.name}.gif"
 
 
 def fire_missile(x, y):
-    info = Missile(color='white', x=BASE_X, y=BASE_Y, x2=x, y2=y)
+    info = Missile(color='white', x=BASE_X, y=BASE_Y + 30, x2=x, y2=y)
     our_missiles.append(info)
 
 
 def fire_enemy_missile():
     x = random.randint(-600, 600)
     y = 400
-    target = random.choice(buildings)
-    info = Missile(color='red', x=x, y=y, x2=target.x, y2=target.y)
-    enemy_missiles.append(info)
+    alive_buildings = [b for b in buildings if b.is_alive()]
+    if alive_buildings:
+        target = random.choice(alive_buildings)
+        info = Missile(color='red', x=x, y=y, x2=target.x, y2=target.y)
+        enemy_missiles.append(info)
 
 
 def move_missiles(missiles):
