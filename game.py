@@ -65,6 +65,7 @@ class Building:
         self.name = bld_name
         self.x = x
         self.y = y
+        self.health = self.INITIAL_HEALTH
 
         pen = turtle.Turtle()
         pen.hideturtle()
@@ -77,16 +78,28 @@ class Building:
         pen.showturtle()
         self.pen = pen
 
-        self.health = self.INITIAL_HEALTH
-
     def get_pic_name(self):
+        if self.health < self.INITIAL_HEALTH * 0.2:
+            return f"{self.name}_3.gif"
+        if self.health < self.INITIAL_HEALTH * 0.8:
+            return f"{self.name}_2.gif"
         return f"{self.name}_1.gif"
+
+    def draw(self):
+        pic_name = self.get_pic_name()
+        pic_path = os.path.join(BASE_PATH, "images", pic_name)
+        if self.pen.shape() != pic_path:
+            window.register_shape(pic_path)
+            self.pen.shape(pic_path)
 
 
 class MissileBase(Building):
     INITIAL_HEALTH = 2000
 
     def get_pic_name(self):
+        for missile in our_missiles:
+            if missile.distance(self.x, self.y) < 20:
+                return f"{self.name}_opened.gif"
         return f"{self.name}.gif"
 
 
@@ -140,6 +153,11 @@ def game_over():
     return base.health < 0
 
 
+def draw_buildings():
+    for building in buildings:
+        building.draw()
+
+
 window = turtle.Screen()
 window.setup(1200 + 3, 800 + 3, starty=0)
 window.bgpic(os.path.join(BASE_PATH, "images", "background.png"))
@@ -168,6 +186,7 @@ while True:
     window.update()
     if game_over():
         continue
+    draw_buildings()
     check_impact()
     check_enemy_count()
     check_interceptions()
