@@ -168,14 +168,14 @@ def check_impact():
             continue
         for building in buildings:
             if enemy_missile.distance(building.x, building.y) < enemy_missile.radius * 10:
-                building.health -= 100
+                building.health -= 25
                 print(f"{building.name} - {building.health}")
 
 
 def game_over():
     for building in buildings:
         if building.name == 'base':
-            return building.health < 0
+            return building.health <= 0
 
 
 def draw_buildings():
@@ -185,14 +185,14 @@ def draw_buildings():
 
 window = turtle.Screen()
 window.setup(1200 + 3, 800 + 3, starty=0)
-window.bgpic(os.path.join(BASE_PATH, "images", "background.png"))
 window.screensize(1200, 800)
 
 
-# TODO Continue from 01:58
 def game():
     global our_missiles, enemy_missiles, buildings
 
+    window.clear()
+    window.bgpic(os.path.join(BASE_PATH, "images", "background.png"))
     window.tracer(n=2)
     window.onclick(fire_missile)
 
@@ -210,7 +210,7 @@ def game():
     while True:
         window.update()
         if game_over():
-            continue
+            break
         draw_buildings()
         check_impact()
         check_enemy_count()
@@ -218,5 +218,16 @@ def game():
         move_missiles(missiles=our_missiles)
         move_missiles(missiles=enemy_missiles)
 
+    title = turtle.Turtle(visible=False)
+    title.speed(0)
+    title.penup()
+    title.setpos(x=0, y=0)
+    title.color("red")
+    title.write("Game Over", align="center", font=["Arial", 30, "bold"])
 
-game()
+
+while True:
+    game()
+    answer = window.textinput(title='Hi!', prompt="Continue game? Y/N")
+    if answer.lower() not in ('y', "yes", 'д', "да"):
+        break
