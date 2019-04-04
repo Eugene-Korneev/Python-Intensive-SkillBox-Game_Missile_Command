@@ -31,10 +31,11 @@ class Missile:
         self.state = 'launched'
         self.target = x2, y2
         self.radius = 0
+        self.speed = 2
 
     def step(self):
         if self.state == 'launched':
-            self.pen.forward(4)
+            self.pen.forward(self.speed)
             if self.pen.distance(x=self.target[0], y=self.target[1]) < 20:
                 self.state = 'explode'
                 self.pen.shape('circle')
@@ -108,7 +109,8 @@ class Building:
         if self.health != self.title_health:
             self.title_health = self.health
             self.title.clear()
-            self.title.write(str(self.title_health), align="center", font=["Arial", 20, "bold"])
+            if self.title_health > 0:
+                self.title.write(str(self.title_health), align="center", font=["Arial", 20, "bold"])
 
     def is_alive(self):
         return self.health > 0
@@ -126,6 +128,7 @@ class MissileBase(Building):
 
 def fire_missile(x, y):
     info = Missile(color='white', x=BASE_X, y=BASE_Y + 30, x2=x, y2=y)
+    info.speed = 20
     our_missiles.append(info)
 
 
@@ -183,11 +186,6 @@ def draw_buildings():
         building.draw()
 
 
-window = turtle.Screen()
-window.setup(1200 + 3, 800 + 3, starty=0)
-window.screensize(1200, 800)
-
-
 def game():
     global our_missiles, enemy_missiles, buildings
 
@@ -218,16 +216,21 @@ def game():
         move_missiles(missiles=our_missiles)
         move_missiles(missiles=enemy_missiles)
 
-    title = turtle.Turtle(visible=False)
-    title.speed(0)
-    title.penup()
-    title.setpos(x=0, y=0)
-    title.color("red")
-    title.write("Game Over", align="center", font=["Arial", 30, "bold"])
+    pen_game_over = turtle.Turtle(visible=False)
+    pen_game_over.speed(0)
+    pen_game_over.penup()
+    pen_game_over.setpos(x=0, y=0)
+    pen_game_over.color("red")
+    pen_game_over.write("Game Over", align="center", font=["Arial", 80, "bold"])
 
+
+window = turtle.Screen()
+window.setup(1200 + 3, 800 + 3, starty=0)
+window.screensize(1200, 800)
+window.textinput(title='Game', prompt="Press OK to start")
 
 while True:
     game()
-    answer = window.textinput(title='Hi!', prompt="Continue game? Y/N")
+    answer = window.textinput(title='Game', prompt="Continue game? Y/N")
     if answer.lower() not in ('y', "yes", 'д', "да"):
         break
