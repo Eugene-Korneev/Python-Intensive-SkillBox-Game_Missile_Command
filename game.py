@@ -3,6 +3,8 @@ import random
 import time
 import turtle
 
+from PIL import ImageTk, Image
+
 
 BASE_PATH = os.path.dirname(__file__)
 BASE_X, BASE_Y = 0, -300
@@ -26,6 +28,13 @@ class Missile:
         pen.pendown()
         heading = pen.towards(x2, y2)
         pen.setheading(heading)
+        pic_path = os.path.join(BASE_PATH, "images", "missile.gif")
+        raw_pic = Image.open(pic_path)
+        rotated_pic = raw_pic.rotate(angle=heading - 90, expand=1).convert('RGBA')
+        pic = ImageTk.PhotoImage(rotated_pic)
+        pic_name = f"pic_{heading - 90}"
+        window.register_shape(pic_name, turtle.Shape("image", pic))
+        pen.shape(pic_name)
         pen.showturtle()
         self.pen = pen
 
@@ -162,8 +171,9 @@ class Game:
             self.buildings.append(bld)
 
     def fire_missile(self, x, y):
-        info = Missile(color='white', x=BASE_X, y=BASE_Y + 30, x2=x, y2=y, speed=30)
-        self.our_missiles.append(info)
+        if self.buildings[0].name == 'base' and self.buildings[0].is_alive():
+            info = Missile(color='white', x=BASE_X, y=BASE_Y + 30, x2=x, y2=y, speed=30)
+            self.our_missiles.append(info)
 
     def fire_enemy_missile(self):
         x = random.randint(-600, 600)
