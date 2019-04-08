@@ -1,5 +1,6 @@
 import os
 import random
+import time
 import turtle
 
 
@@ -36,7 +37,7 @@ class Missile:
     def step(self):
         if self.state == 'launched':
             self.pen.forward(self.speed)
-            if self.pen.distance(x=self.target[0], y=self.target[1]) < 20:
+            if self.pen.distance(x=self.target[0], y=self.target[1]) < 30:
                 self.state = 'explode'
                 self.pen.shape('circle')
         elif self.state == 'explode':
@@ -122,7 +123,7 @@ class MissileBase(Building):
 
     def get_pic_name(self):
         for missile in self.our_missiles:
-            if missile.distance(self.x, self.y) < 50:
+            if missile.distance(self.x, self.y) < 60:
                 return f"{self.name}_opened.gif"
         return f"{self.name}.gif"
 
@@ -133,7 +134,7 @@ class Game:
 
         game_window.clear()
         game_window.bgpic(os.path.join(BASE_PATH, "images", "background.png"))
-        game_window.tracer(n=5)
+        game_window.tracer(n=3)
         game_window.onclick(self.fire_missile)
 
         self.our_missiles = []
@@ -148,6 +149,9 @@ class Game:
         pen = turtle.Turtle(visible=False)
         pen.speed(0)
         pen.penup()
+        pen.setpos(x=520, y=320)
+        pen.color("white")
+        pen.write(f"SCORE: {self.title_score}", align="right", font=["Arial", 40, "bold"])
         self.pen = pen
 
         base = MissileBase(x=BASE_X, y=BASE_Y, bld_name='base', our_missiles=self.our_missiles)
@@ -158,7 +162,7 @@ class Game:
             self.buildings.append(bld)
 
     def fire_missile(self, x, y):
-        info = Missile(color='white', x=BASE_X, y=BASE_Y + 30, x2=x, y2=y, speed=20)
+        info = Missile(color='white', x=BASE_X, y=BASE_Y + 30, x2=x, y2=y, speed=30)
         self.our_missiles.append(info)
 
     def fire_enemy_missile(self):
@@ -191,6 +195,7 @@ class Game:
                 if enemy_missile.distance(our_missile.x, our_missile.y) < our_missile.radius * 10:
                     enemy_missile.state = 'dead'
                     self.score += 1
+                    self.check_game_level()
 
     def check_impact(self):
         for enemy_missile in self.enemy_missiles:
@@ -200,6 +205,12 @@ class Game:
                 if enemy_missile.distance(building.x, building.y) < enemy_missile.radius * 10:
                     building.health -= 25
                     print(f"{building.name} - {building.health}")
+
+    def check_game_level(self):
+        if self.score % 25 == 0:
+            self.speed += 1
+        if self.score % 50 == 0:
+            self.enemy_count += 1
 
     def game_over(self):
         i = 0
@@ -217,15 +228,14 @@ class Game:
         self.pen.color("red")
         self.pen.write("Game Over", align="center", font=["Arial", 80, "bold"])
 
-    # TODO Fix draw score and title score
     def draw_score(self):
-        self.pen.setpos(x=300, y=300)
+        self.pen.setpos(x=520, y=320)
         self.pen.color("white")
 
         if self.score != self.title_score:
             self.title_score = self.score
             self.pen.clear()
-            self.pen.write(f"SCORE: {self.score}", align="left", font=["Arial", 40, "bold"])
+            self.pen.write(f"SCORE: {self.title_score}", align="right", font=["Arial", 40, "bold"])
 
     def main_loop(self):
         while True:
@@ -239,6 +249,7 @@ class Game:
             self.check_interceptions()
             self.move_missiles(missiles=self.our_missiles)
             self.move_missiles(missiles=self.enemy_missiles)
+            time.sleep(0.01)
 
 
 window = turtle.Screen()
