@@ -9,6 +9,7 @@ from PIL import ImageTk, Image
 BASE_PATH = os.path.dirname(__file__)
 BASE_X, BASE_Y = 0, -300
 START_ENEMY_COUNT = 3
+START_SPEED = 1
 BUILDING_INFOS = {'house': [BASE_X - 400, BASE_Y],
                   'kremlin': [BASE_X - 200, BASE_Y],
                   'nuclear': [BASE_X + 200, BASE_Y],
@@ -151,7 +152,7 @@ class Game:
         self.buildings = []
 
         self.enemy_count = START_ENEMY_COUNT
-        self.speed = 1
+        self.speed = START_SPEED
         self.score = 0
         self.title_score = self.score
 
@@ -202,7 +203,7 @@ class Game:
             if our_missile.state != 'explode':
                 continue
             for enemy_missile in self.enemy_missiles:
-                if enemy_missile.distance(our_missile.x, our_missile.y) < our_missile.radius * 10:
+                if enemy_missile.distance(our_missile.x, our_missile.y) < our_missile.radius * 15:
                     enemy_missile.state = 'dead'
                     self.score += 1
                     self.check_game_level()
@@ -212,7 +213,7 @@ class Game:
             if enemy_missile.state != 'explode':
                 continue
             for building in self.buildings:
-                if enemy_missile.distance(building.x, building.y) < enemy_missile.radius * 10:
+                if enemy_missile.distance(building.x, building.y) < enemy_missile.radius * 15:
                     building.health -= 25
                     print(f"{building.name} - {building.health}")
 
@@ -272,5 +273,9 @@ while True:
     game.main_loop()
     game.draw_game_over()
     answer = window.textinput(title='Game', prompt="Continue game? Y/N")
-    if answer.lower() not in ('y', "yes", 'д', "да"):
+    if answer is None:
         break
+    elif answer.lower() not in ('y', "yes", 'д', "да"):
+        break
+
+window.bye()
