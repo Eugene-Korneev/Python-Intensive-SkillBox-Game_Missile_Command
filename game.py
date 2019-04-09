@@ -29,8 +29,8 @@ class Missile:
         heading = pen.towards(x2, y2)
         pen.setheading(heading)
         pic_path = os.path.join(BASE_PATH, "images", "missile.gif")
-        raw_pic = Image.open(pic_path)
-        rotated_pic = raw_pic.rotate(angle=heading - 90, expand=1).convert('RGBA')
+        raw_pic = Image.open(pic_path).convert('RGBA')
+        rotated_pic = raw_pic.rotate(angle=heading - 90, expand=1)
         pic = ImageTk.PhotoImage(rotated_pic)
         pic_name = f"pic_{heading - 90}"
         window.register_shape(pic_name, turtle.Shape("image", pic))
@@ -143,7 +143,7 @@ class Game:
 
         game_window.clear()
         game_window.bgpic(os.path.join(BASE_PATH, "images", "background.png"))
-        game_window.tracer(n=3)
+        game_window.tracer(n=5)
         game_window.onclick(self.fire_missile)
 
         self.our_missiles = []
@@ -259,7 +259,7 @@ class Game:
             self.check_interceptions()
             self.move_missiles(missiles=self.our_missiles)
             self.move_missiles(missiles=self.enemy_missiles)
-            time.sleep(0.01)
+            time.sleep(0.02)
 
 
 window = turtle.Screen()
