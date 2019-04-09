@@ -213,8 +213,8 @@ class Game:
             if enemy_missile.state != 'explode':
                 continue
             for building in self.buildings:
-                if enemy_missile.distance(building.x, building.y) < enemy_missile.radius * 15:
-                    building.health -= 25
+                if enemy_missile.distance(building.x, building.y) < enemy_missile.radius * 30:
+                    building.health -= 20
                     print(f"{building.name} - {building.health}")
 
     def check_game_level(self):
